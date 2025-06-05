@@ -1,10 +1,10 @@
 # Product Launch Signoff
 
-[![Atlassian license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
+
 
 ## Overview
 
-Product Launch Signoff is a comprehensive [UI Kit 2 - Forge app](https://developer.atlassian.com/platform/forge/ui-kit-2/) designed to streamline the product launch process by providing directors and leadership with a centralized, real-time view of launch readiness across all critical product features and requirements.
+Product Launch Signoff is a comprehensive app designed to streamline the product launch process by providing directors and leadership with a centralized, real-time view of launch readiness across all critical product features and requirements.
 
 ## Key Features
 
@@ -81,8 +81,6 @@ Once you have logged into the CLI (`forge login`), follow the steps below to ins
 - **Progress Updates**: Provide real-time status updates visible to leadership
 - **Collaboration**: Coordinate with different teams to ensure all launch requirements are met
 
-![Product Launch Signoff Dashboard](./demo.gif)
-
 This app is designed to be highly configurable for different organizations and product types. You can customize the launch gates, checklists, and approval workflows by editing the configuration files in the `src/` directory.
 
 ## Debugging
@@ -95,9 +93,4 @@ Alternatively, you can use the [`forge tunnel`](https://developer.atlassian.com/
 FORGE_USER_VAR_DEBUG_LOGGING=1 forge tunnel
 ```
 
-## License
 
-Copyright (c) 2023 Atlassian and others.
-Apache 2.0 licensed, see [LICENSE](LICENSE) file.
-
-[![From Atlassian](https://raw.githubusercontent.com/atlassian-internal/oss-assets/master/banner-cheers.png)](https://www.atlassian.com)
