@@ -1,10 +1,34 @@
-# UI Kit 2 - Issue Translation
+# Product Launch Signoff
 
 [![Atlassian license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
 
-This is an example [UI Kit 2 - Forge app](https://developer.atlassian.com/platform/forge/ui-kit-2/) that translates Jira issue fields contents into a range of different languages using the [Azure Translator Text API](https://learn.microsoft.com/en-us/azure/ai-services/translator/).
+## Overview
 
-**Note**: This example app is based off of the [UI Kit - Issue translator app](https://bitbucket.org/atlassian/forge-issue-translation/src/master/) example application.
+Product Launch Signoff is a comprehensive [UI Kit 2 - Forge app](https://developer.atlassian.com/platform/forge/ui-kit-2/) designed to streamline the product launch process by providing directors and leadership with a centralized, real-time view of launch readiness across all critical product features and requirements.
+
+## Key Features
+
+This application empowers leadership teams to:
+
+- **Track Launch Readiness**: Monitor completion status of essential product launch gates including security reviews, compliance audits, documentation, QA testing, and regulatory approvals
+- **Executive Dashboard**: Get a high-level summary view of which features are ready for launch and which still require attention
+- **Gate Management**: Organize and track different types of launch requirements such as:
+  - Security & Privacy compliance
+  - Documentation completeness
+  - Quality assurance validation
+  - Legal and regulatory approvals
+  - Marketing and sales readiness
+  - Technical infrastructure verification
+- **Status Visualization**: Clear visual indicators showing completion status, blockers, and progress across all launch criteria
+- **Leadership Insights**: Quickly identify bottlenecks, at-risk features, and areas requiring executive attention or resource allocation
+
+## Benefits
+
+- **Centralized Visibility**: All launch criteria and their status in one consolidated view
+- **Informed Decision Making**: Real-time data to make confident go/no-go launch decisions
+- **Risk Mitigation**: Early identification of incomplete requirements and potential launch blockers
+- **Accountability**: Clear ownership and tracking of responsibilities across teams
+- **Streamlined Communication**: Reduce status meetings and email chains with always-current launch status
 
 ## Requirements
 
@@ -16,10 +40,10 @@ Once you have logged into the CLI (`forge login`), follow the steps below to ins
 
 1. Clone this repository:
     
-    `git clone git@bitbucket.org:atlassian/forge-ui-kit-2-translate.git`
+    `git clone <repository-url>`
 1. Change to the app directory:
 
-    `cd forge-ui-kit-2-translate`
+    `cd product-launch-signoff`
 
 1. Register the app:
    
@@ -39,21 +63,27 @@ Once you have logged into the CLI (`forge login`), follow the steps below to ins
 
 ## Installation
 
-1. [Sign up for the Azure Translator Text API](https://learn.microsoft.com/en-us/azure/ai-services/translator/create-translator-resource) (the free tier allows 2 million characters per month at time of writing)
-1. Find your **Authentication key** and **Location** on the "Keys and Endpoint" page.
-   ![Azure API key and location](./azurekey.png)
-1. Set an encrypted [environment variable](https://developer.atlassian.com/platform/forge/environments/) keyed by `TRANSLATE_API_KEY` with a value of your Translator Text API **Authentication key**. `forge variables set --encrypt TRANSLATE_API_KEY xxxxxxxxxx`.
-1. Set the `TRANSLATE_API_LOCATION` environment variable to the value of your Translator Text API **Location**. `forge variables set TRANSLATE_API_LOCATION xxxxxxxxxx`.
-1. Run `forge deploy` to deploy the changes to your environment variables.
-1. You're done! Test out the app by browsing to a Jira issue and clicking one of the buttons on the "Translate" panel.
+1. Run `forge deploy` to deploy the app to your environment.
+1. Navigate to any Jira project where you're tracking product features or launch requirements.
+1. You're ready to start tracking your product launch readiness! Access the Product Launch Signoff panel from the issue view to begin monitoring your launch gates and checklists.
 
 ## Usage
 
-Press the corresponding button on the issue view to translate the issue summary and description into the language of your choice.
+### For Directors and Leadership:
+- **Executive Summary**: View high-level completion percentages across all launch criteria
+- **Feature Readiness**: See which product features are fully approved and ready for launch
+- **Risk Assessment**: Identify features with incomplete requirements that may impact launch timelines
+- **Team Performance**: Monitor progress across different departments (Security, Legal, QA, Documentation, etc.)
 
-![Animation of translate issue content panel](./demo.gif)
+### For Product Teams:
+- **Gate Tracking**: Update completion status for security reviews, compliance checks, documentation, and other launch requirements
+- **Checklist Management**: Maintain detailed checklists for each launch criterion
+- **Progress Updates**: Provide real-time status updates visible to leadership
+- **Collaboration**: Coordinate with different teams to ensure all launch requirements are met
 
-This app is designed as a Forge reference example for developers. There are no user-facing configuration options, but you can modify the supported languages and translated fields by editing `src/frontend/index.jsx`.
+![Product Launch Signoff Dashboard](./demo.gif)
+
+This app is designed to be highly configurable for different organizations and product types. You can customize the launch gates, checklists, and approval workflows by editing the configuration files in the `src/` directory.
 
 ## Debugging
 
@@ -62,7 +92,7 @@ You can enable verbose logging by setting the `DEBUG_LOGGING` [environment varia
 Alternatively, you can use the [`forge tunnel`](https://developer.atlassian.com/platform/forge/change-the-frontend-with-forge-ui/#set-up-tunneling) command to run your Forge app locally. Note that you must pass the environment variable values to the tunnel with the prefix `FORGE_USER_VAR_`, e.g.:
 
 ```
-FORGE_USER_VAR_TRANSLATE_API_KEY=your_translate_api_key_here FORGE_USER_VAR_DEBUG_LOGGING=1 forge tunnel
+FORGE_USER_VAR_DEBUG_LOGGING=1 forge tunnel
 ```
 
 ## License
