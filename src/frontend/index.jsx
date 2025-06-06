@@ -1,11 +1,13 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import ForgeReconciler, { Text, DynamicTable } from '@forge/react';
+import ForgeReconciler, { Text, DynamicTable, Button, Modal, ModalBody, ModalTransition, ModalTitle, ModalFooter, ModalHeader } from '@forge/react';
 import { invoke } from '@forge/bridge';
 
 const App = () => {
   const [launchItems, setLaunchItems] = useState([]);
   const [launchItemsError, setLaunchItemsError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSignoffModal, setShowSignoffModal] = useState(false);
+  const [isSignedOff, setIsSignedOff] = useState(false);
 
   useEffect(() => {
     const fetchLaunchItems = async () => {
@@ -61,6 +63,28 @@ const App = () => {
   const completedItems = launchItems.filter(item => 
     isDoneStatus(item.statusCategory, item.status)
   ).length;
+  
+  const notApplicableItems = launchItems.filter(item => 
+    isNotApplicableStatus(item.statusCategory, item.status)
+  ).length;
+  
+  const pendingItems = launchItems.length - completedItems - notApplicableItems;
+  const isReadyForSignoff = pendingItems === 0 && launchItems.length > 0;
+
+  const handleSignoffClick = () => {
+    setShowSignoffModal(true);
+  };
+
+  const handleSignoffConfirm = () => {
+    if (isReadyForSignoff) {
+      setIsSignedOff(true);
+      setShowSignoffModal(false);
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowSignoffModal(false);
+  };
 
   // Create table head configuration
   const head = {
@@ -157,13 +181,86 @@ const App = () => {
             emptyView="No launch gates found. Create subtasks to track launch requirements."
           />
           <Text> </Text>
-          <Text>🚀 Launch Status: {completedItems === launchItems.length ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
+          <Text>🚀 Launch Status: {isReadyForSignoff ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
+          
+          {/* Signoff Panel */}
+          <Text> </Text>
+          <Text>━━━━━━━━━━━━━━━━━ EXECUTIVE SIGNOFF ━━━━━━━━━━━━━━━━━</Text>
+          {isSignedOff ? (
+            <Fragment>
+              <Text>✅ LAUNCH APPROVED AND SIGNED OFF</Text>
+              <Text>This product launch has been officially approved for release.</Text>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Button 
+                text={isReadyForSignoff ? "Sign Off on Launch" : "Review Launch Status"}
+                appearance={isReadyForSignoff ? "primary" : "warning"}
+                onClick={handleSignoffClick}
+              />
+              <Text>Executive approval required before launch can proceed.</Text>
+            </Fragment>
+          )}
         </Fragment>
       ) : (
         <Fragment>
           <Text>No launch gates found. Create subtasks to track launch requirements.</Text>
         </Fragment>
       )}
+
+      {/* Professional Modal Dialog */}
+      <ModalTransition>
+        {showSignoffModal && (
+          <Modal onClose={handleModalClose} width="medium">
+            <ModalHeader>
+              <ModalTitle appearance={isReadyForSignoff ? undefined : "warning"}>
+                {isReadyForSignoff ? "Launch Signoff Confirmation" : "Launch Not Ready for Signoff"}
+              </ModalTitle>
+            </ModalHeader>
+            <ModalBody>
+              {isReadyForSignoff ? (
+                <Fragment>
+                  <Text>✅ All launch requirements have been completed.</Text>
+                  <Text> </Text>
+                  <Text>Launch Summary:</Text>
+                  <Text>• {completedItems} items completed ✅</Text>
+                  <Text>• {notApplicableItems} items marked as not applicable 🔲</Text>
+                  <Text>• {pendingItems} items pending ⏸️</Text>
+                  <Text> </Text>
+                  <Text>🚀 Are you ready to officially sign off on this product launch?</Text>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <Text>⚠️ This launch is not ready for executive signoff.</Text>
+                  <Text> </Text>
+                  <Text>Outstanding requirements:</Text>
+                  <Text>• {pendingItems} items still pending completion ❌</Text>
+                  <Text>• {completedItems} items completed ✅</Text>
+                  <Text>• {notApplicableItems} items marked as not applicable 🔲</Text>
+                  <Text> </Text>
+                  <Text>📋 Please ensure all launch gates are completed before requesting executive signoff.</Text>
+                </Fragment>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              {isReadyForSignoff ? (
+                <Fragment>
+                  <Button appearance="subtle" onClick={handleModalClose}>
+                    Cancel
+                  </Button>
+                  <Button appearance="primary" onClick={handleSignoffConfirm}>
+                    Confirm Launch Signoff
+                  </Button>
+                </Fragment>
+              ) : (
+                <Button appearance="primary" onClick={handleModalClose}>
+                  Close
+                </Button>
+              )}
+            </ModalFooter>
+          </Modal>
+        )}
+      </ModalTransition>
     </Fragment>
   );
 };
