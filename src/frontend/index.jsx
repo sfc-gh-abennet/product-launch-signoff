@@ -274,25 +274,30 @@ const App = () => {
           
           {/* Engineering Director Signoff */}
           <Text> </Text>
-          <Text>━━━━━━━━━━━━━━━━━ ENGINEERING DIRECTOR SIGNOFF ━━━━━━━━━━━━━━━━━</Text>
           {isEngineeringSignedOff ? (
             <Fragment>
+              <Text>ENGINEERING DIRECTOR SIGNOFF</Text>
               <Text>✅ ENGINEERING APPROVED AND SIGNED OFF</Text>
               <Text>Engineering requirements have been officially approved for release.</Text>
             </Fragment>
           ) : (
             <Fragment>
+              <Text>ENGINEERING DIRECTOR SIGNOFF</Text>
               <Button 
-                text={isEngineeringReadyForSignoff ? "Engineering Director Sign Off" : "Review Engineering Status"}
-                appearance={isEngineeringReadyForSignoff ? "primary" : "warning"}
+                appearance="primary"
                 onClick={handleEngineeringSignoffClick}
-              />
+              >
+                Signoff
+              </Button>
               <Text>Engineering Director approval required before launch can proceed.</Text>
             </Fragment>
           )}
           
           <Text> </Text>
           <Text> </Text>
+          
+          {/* Responsive Separator Line */}
+          <Text>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
           
           {/* Product Launch Requirements Panel */}
           <Text>🎯 PRODUCT LAUNCH REQUIREMENTS</Text>
@@ -317,7 +322,7 @@ const App = () => {
           
           {/* Product Director Signoff */}
           <Text> </Text>
-          <Text>━━━━━━━━━━━━━━━━━ PRODUCT DIRECTOR SIGNOFF ━━━━━━━━━━━━━━━━━</Text>
+          <Text>PRODUCT DIRECTOR SIGNOFF</Text>
           {isProductSignedOff ? (
             <Fragment>
               <Text>✅ PRODUCT APPROVED AND SIGNED OFF</Text>
@@ -326,11 +331,12 @@ const App = () => {
           ) : (
             <Fragment>
               <Button 
-                text={isProductReadyForSignoff ? "Product Director Sign Off" : "Review Product Status"}
-                appearance={isProductReadyForSignoff ? "primary" : "warning"}
+                appearance="primary"
                 onClick={handleProductSignoffClick}
-              />
-              <Text>Product Director approval required before launch can proceed.</Text>
+              >
+                Signoff
+              </Button>
+              <Text>Product Director Signoff - approval required before launch can proceed.</Text>
             </Fragment>
           )}
           
