@@ -5,6 +5,8 @@ import { invoke } from '@forge/bridge';
 const App = () => {
   const [launchItems, setLaunchItems] = useState([]);
   const [launchItemsError, setLaunchItemsError] = useState(null);
+  const [engineeringItems, setEngineeringItems] = useState([]);
+  const [engineeringError, setEngineeringError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSignoffModal, setShowSignoffModal] = useState(false);
   const [isSignedOff, setIsSignedOff] = useState(false);
@@ -16,8 +18,11 @@ const App = () => {
         const resp = await invoke('getChildIssues');
         setLaunchItems(resp.childIssues || []);
         setLaunchItemsError(resp.error || null);
+        setEngineeringItems(resp.engineeringItems || []);
+        setEngineeringError(resp.engineeringError || null);
       } catch (error) {
         setLaunchItemsError(`Failed to load data: ${error.message}`);
+        setEngineeringError(`Failed to load engineering data: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -73,6 +78,15 @@ const App = () => {
     "Feature Training"
   ];
 
+  // Configurable Engineering Checklist
+  const engineeringChecklist = [
+    "X-features supported: Replication, SBR, Cloning, Bundles - Req for PuPr/GA",
+    "Feature parameter registered",
+    "Security reviewed",
+    "Compliance reviewed",
+    "Operational Readiness reviewed"
+  ];
+
   // Filter items that match the product launch checklist
   const isProductLaunchItem = (item) => {
     const itemSummary = item.summary.trim();
@@ -83,8 +97,19 @@ const App = () => {
     );
   };
 
+  // Filter engineering items that match the engineering checklist
+  const isEngineeringChecklistItem = (item) => {
+    const itemSummary = item.summary.trim();
+    return engineeringChecklist.some(checklistItem => 
+      itemSummary === checklistItem || 
+      itemSummary.toLowerCase().includes(checklistItem.toLowerCase()) ||
+      checklistItem.toLowerCase().includes(itemSummary.toLowerCase())
+    );
+  };
+
   const productLaunchItems = launchItems.filter(item => isProductLaunchItem(item));
   const otherItems = launchItems.filter(item => !isProductLaunchItem(item));
+  const engineeringChecklistItems = engineeringItems.filter(item => isEngineeringChecklistItem(item));
 
   const getCompletionStats = (items) => {
     const completed = items.filter(item => isDoneStatus(item.statusCategory, item.status)).length;
@@ -96,11 +121,14 @@ const App = () => {
 
   const productLaunchStats = getCompletionStats(productLaunchItems);
   const otherStats = getCompletionStats(otherItems);
+  const engineeringStats = getCompletionStats(engineeringChecklistItems);
   
-  const completedItems = productLaunchStats.completed + otherStats.completed;
-  const notApplicableItems = productLaunchStats.notApplicable + otherStats.notApplicable;
-  const pendingItems = productLaunchStats.pending + otherStats.pending;
-  const isReadyForSignoff = productLaunchStats.isReady && productLaunchItems.length > 0;
+  const completedItems = productLaunchStats.completed + otherStats.completed + engineeringStats.completed;
+  const notApplicableItems = productLaunchStats.notApplicable + otherStats.notApplicable + engineeringStats.notApplicable;
+  const pendingItems = productLaunchStats.pending + otherStats.pending + engineeringStats.pending;
+  const isReadyForSignoff = productLaunchStats.isReady && productLaunchItems.length > 0 && 
+                          (engineeringError || engineeringStats.isReady) && 
+                          (engineeringChecklistItems.length > 0 || engineeringError);
 
   const handleSignoffClick = () => {
     setShowSignoffModal(true);
@@ -243,6 +271,38 @@ const App = () => {
           )}
           
           <Text> </Text>
+          
+          {/* Engineering Signoff Panel */}
+          <Text>⚙️ ENGINEERING SIGNOFF</Text>
+          {engineeringError ? (
+            <Fragment>
+              <Text>⚠️ {engineeringError}</Text>
+              <Text>Status: ❌ NOT READY</Text>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Text>Progress: {engineeringStats.completed} of {engineeringChecklistItems.length} items completed</Text>
+              <Text>Status: {engineeringStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
+              <Text> </Text>
+              
+              {engineeringChecklistItems.length > 0 ? (
+                <DynamicTable
+                  caption="Engineering Launch Checklist"
+                  head={createTableHead()}
+                  rows={createTableRows(engineeringChecklistItems, 'engineering')}
+                  rowsPerPage={10}
+                  isLoading={false}
+                  defaultSortKey="complete"
+                  defaultSortOrder="ASC"
+                  emptyView="No engineering checklist items found."
+                />
+              ) : (
+                <Text>No engineering checklist items found.</Text>
+              )}
+            </Fragment>
+          )}
+          
+          <Text> </Text>
           <Text>🚀 Launch Status: {isReadyForSignoff ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
           
           {/* Executive Signoff Panel */}
@@ -286,6 +346,7 @@ const App = () => {
                   <Text>This product is ready for launch!</Text>
                   <Text> </Text>
                   <Text>🎯 Product Launch Requirements: ✅ Ready ({productLaunchStats.completed} of {productLaunchItems.length} completed)</Text>
+                  <Text>⚙️ Engineering Signoff: {engineeringError ? '❌ Error' : (engineeringStats.isReady ? '✅ Ready' : '⏸️ In Progress')} ({engineeringStats.completed} of {engineeringChecklistItems.length} completed)</Text>
                   {otherItems.length > 0 && (
                     <Text>📋 Other Items: {otherStats.completed} of {otherItems.length} completed (not required for launch)</Text>
                   )}
@@ -300,6 +361,17 @@ const App = () => {
                   <Text>   • Completed: {productLaunchStats.completed}</Text>
                   <Text>   • Not Applicable: {productLaunchStats.notApplicable}</Text>
                   <Text>   • Pending: {productLaunchStats.pending}</Text>
+                  <Text> </Text>
+                  <Text>⚙️ Engineering Signoff: {engineeringError ? '❌ Error' : (engineeringStats.isReady ? '✅ Ready' : '⏸️ In Progress')}</Text>
+                  {engineeringError ? (
+                    <Text>   • {engineeringError}</Text>
+                  ) : (
+                    <Fragment>
+                      <Text>   • Completed: {engineeringStats.completed}</Text>
+                      <Text>   • Not Applicable: {engineeringStats.notApplicable}</Text>
+                      <Text>   • Pending: {engineeringStats.pending}</Text>
+                    </Fragment>
+                  )}
                   <Text> </Text>
                   {otherItems.length > 0 && (
                     <Fragment>
