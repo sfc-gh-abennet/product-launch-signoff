@@ -48,7 +48,7 @@ const App = () => {
   const getStatusIndicator = (statusCategory, statusName) => {
     // Check for Not Applicable first, before checking for Done status
     if (isNotApplicableStatus(statusCategory, statusName)) {
-      return 'N/A';
+      return '⊘';
     } else if (isDoneStatus(statusCategory, statusName)) {
       return '✅';
     } else {
@@ -93,31 +93,19 @@ const App = () => {
         key: 'launch-gate',
         content: 'Launch Gate',
         isSortable: true,
-        width: 40
+        width: 60
       },
       {
         key: 'assignee',
         content: 'Assignee',
         isSortable: true,
-        width: 20
-      },
-      {
-        key: 'priority',
-        content: 'Priority',
-        isSortable: true,
-        width: 15
-      },
-      {
-        key: 'status',
-        content: 'Status',
-        isSortable: true,
-        width: 15
+        width: 25
       },
       {
         key: 'complete',
         content: 'Complete',
         isSortable: true,
-        width: 10
+        width: 15
       }
     ]
   };
@@ -136,14 +124,6 @@ const App = () => {
         {
           key: 'assignee',
           content: item.assignee || 'Unassigned'
-        },
-        {
-          key: 'priority',
-          content: item.priority || 'None'
-        },
-        {
-          key: 'status',
-          content: item.status
         },
         {
           key: 'complete',
@@ -224,7 +204,7 @@ const App = () => {
                   <Text> </Text>
                   <Text>Launch Summary:</Text>
                   <Text>• {completedItems} items completed ✅</Text>
-                  <Text>• {notApplicableItems} items marked as not applicable 🔲</Text>
+                  <Text>• {notApplicableItems} items marked as not applicable ⊘</Text>
                   <Text>• {pendingItems} items pending ⏸️</Text>
                   <Text> </Text>
                   <Text>🚀 Are you ready to officially sign off on this product launch?</Text>
@@ -236,7 +216,7 @@ const App = () => {
                   <Text>Outstanding requirements:</Text>
                   <Text>• {pendingItems} items still pending completion ❌</Text>
                   <Text>• {completedItems} items completed ✅</Text>
-                  <Text>• {notApplicableItems} items marked as not applicable 🔲</Text>
+                  <Text>• {notApplicableItems} items marked as not applicable ⊘</Text>
                   <Text> </Text>
                   <Text>📋 Please ensure all launch gates are completed before requesting executive signoff.</Text>
                 </Fragment>
