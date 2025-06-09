@@ -60,16 +60,47 @@ const App = () => {
     return <Text>Loading Product Launch Signoff Status...</Text>;
   }
 
-  const completedItems = launchItems.filter(item => 
-    isDoneStatus(item.statusCategory, item.status)
-  ).length;
+  // Configurable Product Launch Checklist
+  const productLaunchChecklist = [
+    "Data Science - Metrics",
+    "Launch and Sales Enablement", 
+    "Sales Operations Coordination",
+    "Pricing and Monetization",
+    "Customer Enablement",
+    "Customer Support Enablement",
+    "Documentation",
+    "Legal Review",
+    "Feature Training"
+  ];
+
+  // Filter items that match the product launch checklist
+  const isProductLaunchItem = (item) => {
+    const itemSummary = item.summary.trim();
+    return productLaunchChecklist.some(checklistItem => 
+      itemSummary === checklistItem || 
+      itemSummary.toLowerCase().includes(checklistItem.toLowerCase()) ||
+      checklistItem.toLowerCase().includes(itemSummary.toLowerCase())
+    );
+  };
+
+  const productLaunchItems = launchItems.filter(item => isProductLaunchItem(item));
+  const otherItems = launchItems.filter(item => !isProductLaunchItem(item));
+
+  const getCompletionStats = (items) => {
+    const completed = items.filter(item => isDoneStatus(item.statusCategory, item.status)).length;
+    const notApplicable = items.filter(item => isNotApplicableStatus(item.statusCategory, item.status)).length;
+    const pending = items.length - completed - notApplicable;
+    const isReady = pending === 0 && items.length > 0;
+    return { completed, notApplicable, pending, isReady };
+  };
+
+  const productLaunchStats = getCompletionStats(productLaunchItems);
+  const otherStats = getCompletionStats(otherItems);
   
-  const notApplicableItems = launchItems.filter(item => 
-    isNotApplicableStatus(item.statusCategory, item.status)
-  ).length;
-  
-  const pendingItems = launchItems.length - completedItems - notApplicableItems;
-  const isReadyForSignoff = pendingItems === 0 && launchItems.length > 0;
+  const completedItems = productLaunchStats.completed + otherStats.completed;
+  const notApplicableItems = productLaunchStats.notApplicable + otherStats.notApplicable;
+  const pendingItems = productLaunchStats.pending + otherStats.pending;
+  const isReadyForSignoff = productLaunchStats.isReady && productLaunchItems.length > 0;
 
   const handleSignoffClick = () => {
     setShowSignoffModal(true);
@@ -87,7 +118,7 @@ const App = () => {
   };
 
   // Create table head configuration
-  const head = {
+  const createTableHead = () => ({
     cells: [
       {
         key: 'launch-gate',
@@ -108,30 +139,32 @@ const App = () => {
         width: 15
       }
     ]
-  };
-
-  // Create table rows from launch items
-  const rows = launchItems.map((item, index) => {
-    const indicator = getStatusIndicator(item.statusCategory, item.status);
-    
-    return {
-      key: `row-${index}-${item.key}`,
-      cells: [
-        {
-          key: 'launch-gate',
-          content: item.summary
-        },
-        {
-          key: 'assignee',
-          content: item.assignee || 'Unassigned'
-        },
-        {
-          key: 'complete',
-          content: indicator
-        }
-      ]
-    };
   });
+
+  // Create table rows from items
+  const createTableRows = (items, prefix) => {
+    return items.map((item, index) => {
+      const indicator = getStatusIndicator(item.statusCategory, item.status);
+      
+      return {
+        key: `${prefix}-row-${index}-${item.key}`,
+        cells: [
+          {
+            key: 'launch-gate',
+            content: item.summary
+          },
+          {
+            key: 'assignee',
+            content: item.assignee || 'Unassigned'
+          },
+          {
+            key: 'complete',
+            content: indicator
+          }
+        ]
+      };
+    });
+  };
 
   return (
     <Fragment>
@@ -150,20 +183,51 @@ const App = () => {
       
       {launchItems.length > 0 ? (
         <Fragment>
-          <DynamicTable
-            caption="Product Launch Signoff Tracking"
-            head={head}
-            rows={rows}
-            rowsPerPage={10}
-            isLoading={false}
-            defaultSortKey="complete"
-            defaultSortOrder="ASC"
-            emptyView="No launch gates found. Create subtasks to track launch requirements."
-          />
+          {/* Product Launch Requirements Panel */}
+          <Text>🎯 PRODUCT LAUNCH REQUIREMENTS</Text>
+          <Text>Progress: {productLaunchStats.completed} of {productLaunchItems.length} items completed</Text>
+          <Text>Status: {productLaunchStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
+          <Text> </Text>
+          
+          {productLaunchItems.length > 0 ? (
+            <DynamicTable
+              caption="Product Launch Checklist"
+              head={createTableHead()}
+              rows={createTableRows(productLaunchItems, 'product-launch')}
+              rowsPerPage={10}
+              isLoading={false}
+              defaultSortKey="complete"
+              defaultSortOrder="ASC"
+              emptyView="No product launch requirements found."
+            />
+          ) : (
+            <Text>No items found matching the product launch checklist.</Text>
+          )}
+          
+          {otherItems.length > 0 && (
+            <Fragment>
+              <Text> </Text>
+              <Text>📋 OTHER ITEMS ({otherItems.length} items not part of launch checklist)</Text>
+              <Text>These items are tracked but not required for launch signoff.</Text>
+              <Text> </Text>
+              
+              <DynamicTable
+                caption="Other Work Items"
+                head={createTableHead()}
+                rows={createTableRows(otherItems, 'other')}
+                rowsPerPage={5}
+                isLoading={false}
+                defaultSortKey="complete"
+                defaultSortOrder="ASC"
+                emptyView="No other items found."
+              />
+            </Fragment>
+          )}
+          
           <Text> </Text>
           <Text>🚀 Launch Status: {isReadyForSignoff ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
           
-          {/* Signoff Panel */}
+          {/* Executive Signoff Panel */}
           <Text> </Text>
           <Text>━━━━━━━━━━━━━━━━━ EXECUTIVE SIGNOFF ━━━━━━━━━━━━━━━━━</Text>
           {isSignedOff ? (
@@ -200,25 +264,33 @@ const App = () => {
             <ModalBody>
               {isReadyForSignoff ? (
                 <Fragment>
-                  <Text>✅ All launch requirements have been completed.</Text>
+                  <Text>✅ All product launch requirements have been completed or marked as not applicable.</Text>
+                  <Text>This product is ready for launch!</Text>
                   <Text> </Text>
-                  <Text>Launch Summary:</Text>
-                  <Text>• {completedItems} items completed ✅</Text>
-                  <Text>• {notApplicableItems} items marked as not applicable ⊘</Text>
-                  <Text>• {pendingItems} items pending ⏸️</Text>
+                  <Text>🎯 Product Launch Requirements: ✅ Ready ({productLaunchStats.completed} of {productLaunchItems.length} completed)</Text>
+                  {otherItems.length > 0 && (
+                    <Text>📋 Other Items: {otherStats.completed} of {otherItems.length} completed (not required for launch)</Text>
+                  )}
                   <Text> </Text>
                   <Text>🚀 Are you ready to officially sign off on this product launch?</Text>
                 </Fragment>
               ) : (
                 <Fragment>
-                  <Text>⚠️ This launch is not ready for executive signoff.</Text>
+                  <Text>⚠️ Product launch requirements are not yet complete.</Text>
                   <Text> </Text>
-                  <Text>Outstanding requirements:</Text>
-                  <Text>• {pendingItems} items still pending completion ❌</Text>
-                  <Text>• {completedItems} items completed ✅</Text>
-                  <Text>• {notApplicableItems} items marked as not applicable ⊘</Text>
+                  <Text>🎯 Product Launch Requirements: {productLaunchStats.isReady ? '✅ Ready' : '⏸️ In Progress'}</Text>
+                  <Text>   • Completed: {productLaunchStats.completed}</Text>
+                  <Text>   • Not Applicable: {productLaunchStats.notApplicable}</Text>
+                  <Text>   • Pending: {productLaunchStats.pending}</Text>
                   <Text> </Text>
-                  <Text>📋 Please ensure all launch gates are completed before requesting executive signoff.</Text>
+                  {otherItems.length > 0 && (
+                    <Fragment>
+                      <Text>📋 Other Items: {otherStats.completed} of {otherItems.length} completed</Text>
+                      <Text>   (These items are not required for launch signoff)</Text>
+                      <Text> </Text>
+                    </Fragment>
+                  )}
+                  <Text>📋 Please complete all required product launch checklist items before signing off.</Text>
                 </Fragment>
               )}
             </ModalBody>
