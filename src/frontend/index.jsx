@@ -124,13 +124,13 @@ const App = () => {
         key: 'launch-gate',
         content: 'Launch Gate',
         isSortable: true,
-        width: 60
+        width: 50
       },
       {
         key: 'assignee',
         content: 'Assignee',
         isSortable: true,
-        width: 25
+        width: 35
       },
       {
         key: 'complete',
@@ -141,10 +141,28 @@ const App = () => {
     ]
   });
 
+  // Helper function to get user initials
+  const getUserInitials = (assigneeName) => {
+    if (!assigneeName || assigneeName === 'Unassigned') return '?';
+    const names = assigneeName.trim().split(' ');
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Helper function to format assignee display with avatar-like styling
+  const formatAssigneeDisplay = (assigneeName) => {
+    if (!assigneeName || assigneeName === 'Unassigned') {
+      return '❓ Unassigned';
+    }
+    const initials = getUserInitials(assigneeName);
+    return `👤 ${assigneeName}`;
+  };
+
   // Create table rows from items
   const createTableRows = (items, prefix) => {
     return items.map((item, index) => {
       const indicator = getStatusIndicator(item.statusCategory, item.status);
+      const assigneeDisplay = formatAssigneeDisplay(item.assignee);
       
       return {
         key: `${prefix}-row-${index}-${item.key}`,
@@ -155,7 +173,7 @@ const App = () => {
           },
           {
             key: 'assignee',
-            content: item.assignee || 'Unassigned'
+            content: assigneeDisplay
           },
           {
             key: 'complete',
