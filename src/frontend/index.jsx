@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import ForgeReconciler, { Text, DynamicTable, Button, Modal, ModalBody, ModalTransition, ModalTitle, ModalFooter, ModalHeader } from '@forge/react';
+import ForgeReconciler, { Text, DynamicTable, Button, Modal, ModalBody, ModalTransition, ModalTitle, ModalFooter, ModalHeader, Inline } from '@forge/react';
 import { invoke } from '@forge/bridge';
 
 const App = () => {
@@ -163,7 +163,7 @@ const App = () => {
     cells: [
       {
         key: 'launch-gate',
-        content: 'Launch Gate',
+        content: 'Engineering/Product checklist item',
         isSortable: true,
         width: 50
       },
@@ -227,7 +227,10 @@ const App = () => {
 
   return (
     <Fragment>
-      <Text>🚀 Product Launch Signoff Status</Text>
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      {/* PANEL 1: OVERALL SIGNOFF STATUS */}
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      <Text size="xlarge" weight="bold">🚀 PRODUCT LAUNCH SIGNOFF STATUS</Text>
       <Text> </Text>
       
       {launchItemsError && (
@@ -237,208 +240,174 @@ const App = () => {
         </Fragment>
       )}
       
-      <Text>📊 Progress: {completedItems} of {launchItems.length} items completed</Text>
+      <Text>⚙️  Engineering Status: {isEngineeringSignedOff ? '✅ SIGNED OFF' : (isEngineeringReadyForSignoff ? '🔄 READY FOR SIGNOFF' : '⏸️ IN PROGRESS')}</Text>
+      <Text>🎯 Product Status: {isProductSignedOff ? '✅ SIGNED OFF' : (isProductReadyForSignoff ? '🔄 READY FOR SIGNOFF' : '⏸️ IN PROGRESS')}</Text>
+      <Text>🚀 Overall Launch Status: {isReadyForSignoff ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
+      
+      <Text> </Text>
+      <Text>─────────────────────────────────────────────────────────────────────────────────</Text>
+      <Text> </Text>
+
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      {/* PANEL 2: ENGINEERING SIGNOFF */}
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      <Text size="xlarge" weight="bold">⚙️ ENGINEERING SIGNOFF</Text>
       <Text> </Text>
       
-      {launchItems.length > 0 ? (
+      {engineeringError ? (
         <Fragment>
-          {/* Engineering Signoff Panel */}
-          <Text>⚙️ ENGINEERING SIGNOFF</Text>
-          {engineeringError ? (
-            <Fragment>
-              <Text>⚠️ {engineeringError}</Text>
-              <Text>Status: ❌ NOT READY</Text>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <Text>Progress: {engineeringStats.completed} of {engineeringChecklistItems.length} items completed</Text>
-              <Text>Status: {engineeringStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
-              <Text> </Text>
-              
-              {engineeringChecklistItems.length > 0 ? (
-                <DynamicTable
-                  caption="Engineering Launch Checklist"
-                  head={createTableHead()}
-                  rows={createTableRows(engineeringChecklistItems, 'engineering')}
-                  rowsPerPage={10}
-                  isLoading={false}
-                  defaultSortKey="complete"
-                  defaultSortOrder="ASC"
-                  emptyView="No engineering checklist items found."
-                />
-              ) : (
-                <Text>No engineering checklist items found.</Text>
-              )}
-            </Fragment>
-          )}
-          
-          {/* Engineering Director Signoff */}
-          <Text> </Text>
-          {isEngineeringSignedOff ? (
-            <Fragment>
-              <Text>ENGINEERING DIRECTOR SIGNOFF</Text>
-              <Text>✅ ENGINEERING APPROVED AND SIGNED OFF</Text>
-              <Text>Engineering requirements have been officially approved for release.</Text>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <Text>ENGINEERING DIRECTOR SIGNOFF</Text>
-              <Button 
-                appearance="primary"
-                onClick={handleEngineeringSignoffClick}
-              >
-                Signoff
-              </Button>
-              <Text>Engineering Director approval required before launch can proceed.</Text>
-            </Fragment>
-          )}
-          
-          <Text> </Text>
+          <Text>⚠️ {engineeringError}</Text>
+          <Text>Status: ❌ NOT READY</Text>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <Text>Progress: {engineeringStats.completed} of {engineeringChecklistItems.length} items completed</Text>
+          <Text>Status: {engineeringStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
           <Text> </Text>
           
-          {/* Responsive Separator Line */}
-          <Text>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</Text>
-          
-          {/* Product Launch Requirements Panel */}
-          <Text>🎯 PRODUCT LAUNCH REQUIREMENTS</Text>
-          <Text>Progress: {productLaunchStats.completed} of {productLaunchItems.length} items completed</Text>
-          <Text>Status: {productLaunchStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
-          <Text> </Text>
-          
-          {productLaunchItems.length > 0 ? (
-            <DynamicTable
-              caption="Product Launch Checklist"
+          {engineeringChecklistItems.length > 0 ? (
+                    <DynamicTable
               head={createTableHead()}
-              rows={createTableRows(productLaunchItems, 'product-launch')}
+              rows={createTableRows(engineeringChecklistItems, 'engineering')}
               rowsPerPage={10}
               isLoading={false}
               defaultSortKey="complete"
               defaultSortOrder="ASC"
-              emptyView="No product launch requirements found."
+              emptyView="No engineering checklist items found."
             />
           ) : (
-            <Text>No items found matching the product launch checklist.</Text>
+            <Text>No engineering checklist items found.</Text>
           )}
-          
-          {/* Product Director Signoff */}
-          <Text> </Text>
-          <Text>PRODUCT DIRECTOR SIGNOFF</Text>
-          {isProductSignedOff ? (
-            <Fragment>
-              <Text>✅ PRODUCT APPROVED AND SIGNED OFF</Text>
-              <Text>Product requirements have been officially approved for release.</Text>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <Button 
-                appearance="primary"
-                onClick={handleProductSignoffClick}
-              >
-                Signoff
-              </Button>
-              <Text>Product Director Signoff - approval required before launch can proceed.</Text>
-            </Fragment>
-          )}
-          
-          {otherItems.length > 0 && (
-            <Fragment>
-              <Text> </Text>
-              <Text> </Text>
-              <Text>📋 OTHER ITEMS ({otherItems.length} items not part of launch checklist)</Text>
-              <Text>These items are tracked but not required for launch signoff.</Text>
-              <Text> </Text>
-              
-              <DynamicTable
-                caption="Other Work Items"
-                head={createTableHead()}
-                rows={createTableRows(otherItems, 'other')}
-                rowsPerPage={5}
-                isLoading={false}
-                defaultSortKey="complete"
-                defaultSortOrder="ASC"
-                emptyView="No other items found."
-              />
-            </Fragment>
-          )}
-          
-          <Text> </Text>
-          <Text>🚀 Overall Launch Status: {isReadyForSignoff ? 'READY TO LAUNCH!' : 'IN PROGRESS'}</Text>
-          <Text>Complete status: Engineering {isEngineeringSignedOff ? '✅' : '⏸️'} | Product {isProductSignedOff ? '✅' : '⏸️'}</Text>
+        </Fragment>
+      )}
+      
+      {/* Engineering Director Signoff */}
+      <Text> </Text>
+      {isEngineeringSignedOff ? (
+        <Fragment>
+          <Text>✅ ENGINEERING APPROVED AND SIGNED OFF</Text>
+          <Text>Engineering requirements have been officially approved for release.</Text>
         </Fragment>
       ) : (
+        <Inline space="space.200">
+          <Text>ENGINEERING DIRECTOR SIGNOFF</Text>
+          <Button 
+            appearance="primary"
+            onClick={handleEngineeringSignoffClick}
+          >
+            Signoff
+          </Button>
+        </Inline>
+      )}
+      
+      <Text> </Text>
+      <Text>─────────────────────────────────────────────────────────────────────────────────</Text>
+      <Text> </Text>
+
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      {/* PANEL 3: PRODUCT SIGNOFF */}
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      <Text size="xlarge" weight="bold">🎯 PRODUCT SIGNOFF</Text>
+      <Text> </Text>
+      
+      <Text>Progress: {productLaunchStats.completed} of {productLaunchItems.length} items completed</Text>
+      <Text>Status: {productLaunchStats.isReady ? '✅ READY' : '⏸️ IN PROGRESS'}</Text>
+      <Text> </Text>
+      
+      {productLaunchItems.length > 0 ? (
+        <DynamicTable
+          head={createTableHead()}
+          rows={createTableRows(productLaunchItems, 'product-launch')}
+          rowsPerPage={10}
+          isLoading={false}
+          defaultSortKey="complete"
+          defaultSortOrder="ASC"
+          emptyView="No product launch requirements found."
+        />
+      ) : (
+        <Text>No items found matching the product launch checklist.</Text>
+      )}
+      
+      {/* Product Director Signoff */}
+      <Text> </Text>
+      {isProductSignedOff ? (
         <Fragment>
-          <Text>No launch gates found. Create subtasks to track launch requirements.</Text>
+          <Text>✅ PRODUCT APPROVED AND SIGNED OFF</Text>
+          <Text>Product requirements have been officially approved for release.</Text>
+        </Fragment>
+      ) : (
+        <Inline space="space.200">
+          <Text>PRODUCT DIRECTOR SIGNOFF</Text>
+          <Button 
+            appearance="primary"
+            onClick={handleProductSignoffClick}
+          >
+            Signoff
+          </Button>
+        </Inline>
+      )}
+      
+      {/* Optional: Other Items Section */}
+      {otherItems.length > 0 && (
+        <Fragment>
+          <Text> </Text>
+          <Text>📋 OTHER TRACKED ITEMS ({otherItems.length} items not part of core launch checklist)</Text>
+          <Text>These items are tracked but not required for director signoff.</Text>
+          <Text> </Text>
+          
+          <DynamicTable
+            caption="Other Work Items"
+            head={createTableHead()}
+            rows={createTableRows(otherItems, 'other')}
+            rowsPerPage={5}
+            isLoading={false}
+            defaultSortKey="complete"
+            defaultSortOrder="ASC"
+            emptyView="No other items found."
+          />
         </Fragment>
       )}
 
       {/* Professional Modal Dialog */}
       <ModalTransition>
         {showSignoffModal && (
-          <Modal onClose={handleModalClose} width="medium">
+          <Modal onClose={handleModalClose} isBoldHeading>
             <ModalHeader>
-              <ModalTitle appearance={
-                (signoffType === 'engineering' && isEngineeringReadyForSignoff) || 
-                (signoffType === 'product' && isProductReadyForSignoff) 
-                ? undefined : "warning"
-              }>
-                {signoffType === 'engineering' 
-                  ? (isEngineeringReadyForSignoff ? "Engineering Director Signoff Confirmation" : "Engineering Not Ready for Signoff")
-                  : (isProductReadyForSignoff ? "Product Director Signoff Confirmation" : "Product Not Ready for Signoff")
-                }
+              <ModalTitle>
+                {signoffType === 'engineering' ? 'Engineering Director Signoff' : 'Product Director Signoff'}
               </ModalTitle>
             </ModalHeader>
             <ModalBody>
-              {signoffType === 'engineering' ? (
+              {((signoffType === 'engineering' && isEngineeringReadyForSignoff) || 
+                (signoffType === 'product' && isProductReadyForSignoff)) ? (
                 <Fragment>
-                  {isEngineeringReadyForSignoff ? (
-                    <Fragment>
-                      <Text>✅ All engineering requirements have been completed or marked as not applicable.</Text>
-                      <Text>Engineering components are ready for launch!</Text>
-                      <Text> </Text>
-                      <Text>⚙️ Engineering Checklist: ✅ Ready ({engineeringStats.completed} of {engineeringChecklistItems.length} completed)</Text>
-                      <Text> </Text>
-                      <Text>🚀 Are you ready to officially sign off as Engineering Director?</Text>
-                    </Fragment>
-                  ) : (
-                    <Fragment>
-                      <Text>⚠️ Engineering requirements are not yet complete.</Text>
-                      <Text> </Text>
-                      <Text>⚙️ Engineering Signoff: {engineeringError ? '❌ Error' : '⏸️ In Progress'}</Text>
-                      {engineeringError ? (
-                        <Text>   • {engineeringError}</Text>
-                      ) : (
-                        <Fragment>
-                          <Text>   • Completed: {engineeringStats.completed}</Text>
-                          <Text>   • Not Applicable: {engineeringStats.notApplicable}</Text>
-                          <Text>   • Pending: {engineeringStats.pending}</Text>
-                        </Fragment>
-                      )}
-                      <Text> </Text>
-                      <Text>📋 Please complete all required engineering checklist items before signing off.</Text>
-                    </Fragment>
-                  )}
+                  <Text>
+                    ✅ All {signoffType} requirements have been completed and are ready for director approval.
+                  </Text>
+                  <Text> </Text>
+                  <Text>
+                    By confirming this signoff, you are officially approving that all {signoffType} 
+                    launch requirements have been met and the feature is ready for release from a 
+                    {signoffType} perspective.
+                  </Text>
+                  <Text> </Text>
+                  <Text>
+                    ⚠️ This action cannot be undone through the UI.
+                  </Text>
                 </Fragment>
               ) : (
                 <Fragment>
-                  {isProductReadyForSignoff ? (
+                  <Text>
+                    ❌ {signoffType === 'engineering' ? 'Engineering' : 'Product'} requirements are not yet complete.
+                  </Text>
+                  <Text> </Text>
+                  <Text>
+                    Please ensure all {signoffType} checklist items are completed before requesting director signoff.
+                  </Text>
+                  {signoffType === 'engineering' && engineeringError && (
                     <Fragment>
-                      <Text>✅ All product launch requirements have been completed or marked as not applicable.</Text>
-                      <Text>Product requirements are ready for launch!</Text>
                       <Text> </Text>
-                      <Text>🎯 Product Launch Requirements: ✅ Ready ({productLaunchStats.completed} of {productLaunchItems.length} completed)</Text>
-                      <Text> </Text>
-                      <Text>🚀 Are you ready to officially sign off as Product Director?</Text>
-                    </Fragment>
-                  ) : (
-                    <Fragment>
-                      <Text>⚠️ Product launch requirements are not yet complete.</Text>
-                      <Text> </Text>
-                      <Text>🎯 Product Launch Requirements: {productLaunchStats.isReady ? '✅ Ready' : '⏸️ In Progress'}</Text>
-                      <Text>   • Completed: {productLaunchStats.completed}</Text>
-                      <Text>   • Not Applicable: {productLaunchStats.notApplicable}</Text>
-                      <Text>   • Pending: {productLaunchStats.pending}</Text>
-                      <Text> </Text>
-                      <Text>📋 Please complete all required product launch checklist items before signing off.</Text>
+                      <Text>Engineering Error: {engineeringError}</Text>
                     </Fragment>
                   )}
                 </Fragment>
